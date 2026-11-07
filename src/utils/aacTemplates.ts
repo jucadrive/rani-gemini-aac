@@ -1,4 +1,26 @@
-import { AacCard, NounCategory } from '../types/aac';
+import { AacCard, NounCategory, VerbMotionType } from '../types/aac';
+
+/**
+ * @description 커스텀 카드 추가 모달에서 제공하는 빠른 선택용 친근한 이모지 목록
+ */
+export const CUSTOM_CARD_SAMPLE_EMOJIS: readonly string[] = [
+  '🍓', '🧀', '🍌', '🍗', '🍦', '🚂', '🦖', '🎨', '🎹', '🐶', '🐱', '🤗',
+] as const;
+
+/**
+ * @description 동사 커스텀 카드 생성 시 선택할 수 있는 9가지 GIF 모션 옵션 목록
+ */
+export const VERB_MOTION_OPTIONS: { value: VerbMotionType; label: string }[] = [
+  { value: 'begging', label: '🤲 두 손 모아 달라고 하기 (주세요)' },
+  { value: 'more', label: '➕ 하나 더 요청하기 (더 주세요)' },
+  { value: 'eating', label: '🥄 숟가락으로 먹기 (먹어요)' },
+  { value: 'drinking', label: '🥤 컵 기울여 마시기 (마셔요)' },
+  { value: 'playing', label: '🎈 신나게 통통 튀기 (하고 싶어요)' },
+  { value: 'opening', label: '📦 양옆으로 열기 (열어 주세요)' },
+  { value: 'helping', label: '🤝 손 내밀어 도움 요청 (도와주세요)' },
+  { value: 'refusing', label: '🙅 가로저으며 거절 (싫어요)' },
+  { value: 'greeting', label: '👋 손 흔들며 인사 (안녕하세요)' },
+];
 
 /**
  * @description 언어재활 치료를 위한 5대 명사(사물·어휘) 카테고리 정의

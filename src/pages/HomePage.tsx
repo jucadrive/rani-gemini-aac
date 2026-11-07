@@ -1,8 +1,10 @@
-import React, { useMemo } from 'react';
-import { Col, Row, Switch, Tag, Typography } from 'antd';
-import { SmileOutlined, SoundOutlined } from '@ant-design/icons';
+import React, { useMemo, useState } from 'react';
+import { Button, Col, Row, Space, Tag, Typography } from 'antd';
+import { PlusCircleOutlined, SettingOutlined, SmileOutlined } from '@ant-design/icons';
+import { AddCustomCardModal } from '../components/AddCustomCardModal';
 import { NounBoardSection } from '../components/NounBoardSection';
 import { SentenceStripBar } from '../components/SentenceStripBar';
+import { TtsSettingsModal } from '../components/TtsSettingsModal';
 import { VerbBoardSection } from '../components/VerbBoardSection';
 import { useTTS } from '../hooks/useTTS';
 import { getVisibleCards, useAacStore } from '../store/useAacStore';
@@ -10,16 +12,17 @@ import { AacCard } from '../types/aac';
 import { NOUN_CATEGORIES } from '../utils/aacTemplates';
 import { APP_META, WARM_PASTEL_COLORS } from '../utils/constants';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 /**
  * @description [HR-01, HR-03, HR-05] AAC 의사소통 보드 메인 컨테이너 페이지
- * useAacStore(도메인 상태)와 useTTS(음성 합성 훅)를 조합하여 하위 순수 프레젠테이셔널 컴포넌트에 주입합니다.
- * - 명사('빵') 탭 -> '빵' 즉시 발화
- * - 동사('주세요') 탭 -> '주세요' 발화 후 '빵 주세요' 전체 문장 연속 발화
+ * useAacStore와 useTTS를 조합하여 명사 보드, 움직이는 동사 보드, 문장 조합 바 및 치료사용 모달을 제어합니다.
  * @returns {React.ReactElement} 메인 홈 페이지 엘리먼트
  */
 export function HomePage(): React.ReactElement {
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isTtsModalOpen, setIsTtsModalOpen] = useState<boolean>(false);
+
   const {
     activeCategory,
     selectedCards,
@@ -30,11 +33,13 @@ export function HomePage(): React.ReactElement {
     removeSelectedCardAt,
     clearSentence,
     getSentenceText,
+    addCustomCard,
     deleteCustomCard,
     updateTtsSettings,
   } = useAacStore();
 
-  const { isSpeaking, speakingText, speak, speakWithSentence, stop } = useTTS(ttsSettings);
+  const { isSpeaking, speakingText, koreanVoices, speak, speakWithSentence, stop } =
+    useTTS(ttsSettings);
 
   const { nouns, verbs } = useMemo(
     () => getVisibleCards(activeCategory, customCards),
@@ -48,10 +53,7 @@ export function HomePage(): React.ReactElement {
 
   const sentenceText = getSentenceText();
 
-  /**
-   * 명사 또는 동사 카드를 탭했을 때 문장 조합 및 음성 발화를 트리거하는 핸들러
-   * @param card 사용자가 탭한 AAC 카드
-   */
+  /** 명사 또는 움직이는 동사 카드 탭 시 문장 조합 및 음성 발화 처리 */
   const handleSelectCard = (card: AacCard): void => {
     const { wordSpeech, completedSentenceSpeech } = selectCard(card);
     if (completedSentenceSpeech) {
@@ -61,9 +63,7 @@ export function HomePage(): React.ReactElement {
     }
   };
 
-  /**
-   * 상단 문장 조합 바를 모두 비우고 진행 중인 발화를 멈추는 핸들러
-   */
+  /** 상단 문장 바 전체 비우기 및 발화 중지 */
   const handleClearAll = (): void => {
     stop();
     clearSentence();
@@ -77,7 +77,7 @@ export function HomePage(): React.ReactElement {
         padding: '14px 20px 24px',
       }}
     >
-      {/* 상단 앱 타이틀 및 자동 문장 이어읽기 토글 바 */}
+      {/* 상단 앱 헤더 및 치료사용 도구 버튼 (새 카드 만들기 / 음성 설정) */}
       <header
         style={{
           display: 'flex',
@@ -98,20 +98,25 @@ export function HomePage(): React.ReactElement {
           </Tag>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <SoundOutlined style={{ color: WARM_PASTEL_COLORS.VERB_ACCENT, fontSize: 18 }} />
-          <Text strong style={{ fontSize: 14 }}>
-            동사 탭 시 문장 자동 완성 읽기
-          </Text>
-          <Switch
-            aria-label="문장 자동 완성 읽기 스위치"
-            checked={ttsSettings.autoReadCompletedSentence}
-            onChange={(checked) => updateTtsSettings({ autoReadCompletedSentence: checked })}
-          />
-        </div>
+        <Space size="small" wrap>
+          <Button
+            icon={<PlusCircleOutlined />}
+            onClick={() => setIsAddModalOpen(true)}
+            style={{ borderRadius: 14, fontWeight: 600 }}
+          >
+            새 카드 만들기
+          </Button>
+          <Button
+            icon={<SettingOutlined />}
+            onClick={() => setIsTtsModalOpen(true)}
+            style={{ borderRadius: 14, fontWeight: 600 }}
+          >
+            음성·속도 설정
+          </Button>
+        </Space>
       </header>
 
-      {/* 상단 문장 조합 바 (Sentence Strip) */}
+      {/* 상단 문장 조합 바 */}
       <SentenceStripBar
         selectedCards={selectedCards}
         sentenceText={sentenceText}
@@ -122,7 +127,7 @@ export function HomePage(): React.ReactElement {
         onClearAll={handleClearAll}
       />
 
-      {/* 중단: 좌측 명사 칸(58%) vs 우측 움직이는 동사 칸(42%) 분리 레이아웃 */}
+      {/* 중단: 좌측 명사 칸 vs 우측 움직이는 동사 칸 분리 레이아웃 */}
       <Row gutter={[16, 16]} align="stretch">
         <Col xs={24} lg={14}>
           <NounBoardSection
@@ -135,7 +140,6 @@ export function HomePage(): React.ReactElement {
             onDeleteCustomCard={deleteCustomCard}
           />
         </Col>
-
         <Col xs={24} lg={10}>
           <VerbBoardSection
             verbCards={verbs}
@@ -145,6 +149,25 @@ export function HomePage(): React.ReactElement {
           />
         </Col>
       </Row>
+
+      {/* 치료사용 커스텀 카드(사진/GIF) 추가 모달 */}
+      <AddCustomCardModal
+        open={isAddModalOpen}
+        categories={NOUN_CATEGORIES}
+        defaultCategoryId={activeCategory}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddCard={addCustomCard}
+      />
+
+      {/* 고품질 TTS 음성·속도 설정 모달 */}
+      <TtsSettingsModal
+        open={isTtsModalOpen}
+        settings={ttsSettings}
+        koreanVoices={koreanVoices}
+        onUpdateSettings={updateTtsSettings}
+        onTestSpeak={speak}
+        onClose={() => setIsTtsModalOpen(false)}
+      />
     </main>
   );
 }

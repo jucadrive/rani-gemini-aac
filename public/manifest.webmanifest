@@ -1,0 +1,19 @@
+{
+  "name": "마음톡톡 AAC — 언어재활 의사소통 보드",
+  "short_name": "마음톡톡 AAC",
+  "description": "명사와 움직이는 동사(GIF)로 문장을 배우는 태블릿 최적화 AAC 언어재활 웹 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFFDF9",
+  "theme_color": "#FF8E6E",
+  "lang": "ko-KR",
+  "icons": [
+    {
+      "src": "/gifs/begging.gif",
+      "sizes": "32x32",
+      "type": "image/gif"
+    }
+  ]
+}
+

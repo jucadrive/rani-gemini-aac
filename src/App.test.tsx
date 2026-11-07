@@ -5,7 +5,7 @@ import { useAacStore } from './store/useAacStore';
 import { ok, err } from './types/common';
 
 /**
- * @description Phase 4: 갤럭시 탭 S4 최적화 AAC 의사소통 보드 통합 인터랙션 검증 테스트
+ * @description Phase 4 & 5: 갤럭시 탭 S4 최적화 AAC 의사소통 보드 및 치료사 모달 통합 검증 테스트
  */
 describe('마음톡톡 AAC 의사소통 보드 통합 검증', () => {
   beforeEach(() => {
@@ -31,15 +31,12 @@ describe('마음톡톡 AAC 의사소통 보드 통합 검증', () => {
     const breadCardButton = screen.getByLabelText('빵 카드');
     const giveCardButton = screen.getByLabelText('주세요 카드');
 
-    // 1. '빵' 카드 탭
     fireEvent.click(breadCardButton);
     expect(screen.getByText('“빵”')).toBeInTheDocument();
 
-    // 2. '주세요' 움직이는 동사 카드 탭
     fireEvent.click(giveCardButton);
     expect(screen.getByText('“빵 주세요”')).toBeInTheDocument();
 
-    // 3. '지우기' 버튼 클릭 시 초기화 확인
     const clearButton = screen.getByRole('button', { name: /지우기/i });
     fireEvent.click(clearButton);
     expect(screen.queryByText('“빵 주세요”')).not.toBeInTheDocument();
@@ -53,6 +50,18 @@ describe('마음톡톡 AAC 의사소통 보드 통합 검증', () => {
 
     expect(screen.getByLabelText('공 카드')).toBeInTheDocument();
     expect(screen.getByLabelText('비눗방울 카드')).toBeInTheDocument();
+  });
+
+  it('치료사용 "새 카드 만들기" 및 "음성·속도 설정" 버튼이 정상적으로 모달을 열어야 한다', () => {
+    render(<App />);
+
+    const addCardBtn = screen.getByRole('button', { name: /새 카드 만들기/i });
+    fireEvent.click(addCardBtn);
+    expect(screen.getByText(/아동 맞춤형 새 어휘·동작 카드 만들기/i)).toBeInTheDocument();
+
+    const ttsBtn = screen.getByRole('button', { name: /음성·속도 설정/i });
+    fireEvent.click(ttsBtn);
+    expect(screen.getByText(/고품질 한국어 음성\(TTS\) 세부 설정/i)).toBeInTheDocument();
   });
 
   it('[HR-04] Result<T, E> 헬퍼 함수 ok와 err가 정확한 판별 유니온을 반환해야 한다', () => {

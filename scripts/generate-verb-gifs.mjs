@@ -146,3 +146,4 @@ for (const motion of motions) {
 }
 
 console.log(`✅ 9종의 동사 애니메이션 GIF 파일이 ${OUT_DIR} 에 생성되었습니다.`);
+

@@ -64,3 +64,4 @@ describe('Phase 3: AAC 문장 조합 스토어(빵 + 주세요 = 빵 주세요) 
     expect(visibleAfterDelete.nouns.some((c) => c.id === 'custom-strawberry')).toBe(false);
   });
 });
+
