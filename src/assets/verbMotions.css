@@ -1,0 +1,146 @@
+/**
+ * @description 9종의 동사(동작) 카드를 GIF처럼 끊임없이 생동감 있게 움직이게 하는 CSS 키프레임 모음
+ * 아동의 시선을 자연스럽게 유도하며 각 동사의 의미(주세요, 먹어요, 마셔요 등)를 직관적인 움직임으로 전달합니다.
+ */
+
+/* 1. 주세요 (begging): 두 손을 모아 위아래로 공손히 흔드는 모션 */
+@keyframes motionBegging {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-7px) rotate(-6deg) scale(1.08);
+  }
+  60% {
+    transform: translateY(-4px) rotate(6deg) scale(1.05);
+  }
+}
+
+/* 2. 더 주세요 (more): 통통 튀며 크기가 커지는 추가 요청 모션 */
+@keyframes motionMore {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18) translateY(-4px);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+}
+
+/* 3. 먹어요 (eating): 숟가락/음식이 입 쪽으로 반복해서 들어가는 모션 */
+@keyframes motionEating {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-5px, -6px) rotate(-14deg) scale(1.1);
+  }
+}
+
+/* 4. 마셔요 (drinking): 컵을 입 쪽으로 부드럽게 기울이는 모션 */
+@keyframes motionDrinking {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-22deg) translateY(-5px) scale(1.06);
+  }
+}
+
+/* 5. 하고 싶어요 / 놀아요 (playing): 신나게 좌우로 점프하는 모션 */
+@keyframes motionPlaying {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(-8deg);
+  }
+  75% {
+    transform: translateY(-6px) rotate(8deg);
+  }
+}
+
+/* 6. 열어 주세요 (opening): 상자나 뚜껑이 열리는 듯 좌우로 퍼지는 모션 */
+@keyframes motionOpening {
+  0%,
+  100% {
+    transform: scaleX(1) scaleY(1);
+  }
+  50% {
+    transform: scaleX(1.16) scaleY(0.92) translateY(-4px);
+  }
+}
+
+/* 7. 도와주세요 (helping): 손을 앞으로 내밀며 반짝이는 모션 */
+@keyframes motionHelping {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.12);
+  }
+}
+
+/* 8. 싫어요 / 그만 (refusing): 고개나 손을 좌우로 가로젓는 모션 */
+@keyframes motionRefusing {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-6px) rotate(-10deg);
+  }
+  75% {
+    transform: translateX(6px) rotate(10deg);
+  }
+}
+
+/* 9. 안녕하세요 (greeting): 손을 좌우로 흔들며 인사하는 모션 */
+@keyframes motionGreeting {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-16deg) translateY(-3px);
+  }
+  75% {
+    transform: rotate(16deg) translateY(-3px);
+  }
+}
+
+.verb-motion-begging {
+  animation: motionBegging 1.3s ease-in-out infinite;
+}
+.verb-motion-more {
+  animation: motionMore 1.2s ease-in-out infinite;
+}
+.verb-motion-eating {
+  animation: motionEating 1.1s ease-in-out infinite;
+}
+.verb-motion-drinking {
+  animation: motionDrinking 1.4s ease-in-out infinite;
+}
+.verb-motion-playing {
+  animation: motionPlaying 1.1s ease-in-out infinite;
+}
+.verb-motion-opening {
+  animation: motionOpening 1.3s ease-in-out infinite;
+}
+.verb-motion-helping {
+  animation: motionHelping 1.3s ease-in-out infinite;
+}
+.verb-motion-refusing {
+  animation: motionRefusing 0.9s ease-in-out infinite;
+}
+.verb-motion-greeting {
+  animation: motionGreeting 1.1s ease-in-out infinite;
+}
