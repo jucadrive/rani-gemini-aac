@@ -4,6 +4,7 @@ import { DeleteOutlined } from '@ant-design/icons';
 import { AacCard } from '../types/aac';
 import { TOUCH_METRICS, WARM_PASTEL_COLORS } from '../utils/constants';
 import { AnimatedVerbGraphic } from './AnimatedVerbGraphic';
+import '../assets/verbMotions.css';
 
 const { Text } = Typography;
 
@@ -13,8 +14,15 @@ const { Text } = Typography;
 export interface AacWordCardProps {
   /** 렌더링할 AAC 명사 또는 동사 카드 데이터 */
   readonly card: AacCard;
-  /** 현재 문장 조합 바에 선택되어 있는지 여부 */
+  /** 현재 문장 조합 바에 선택되어 있는지 여부 (선택된 카드만 시각적으로 활성화!) */
   readonly isSelected: boolean;
+  /**
+   * 전경·배경 분리(Figure-Ground Separation)를 위해,
+   * 다른 카드가 선택되었을 때 선택되지 않은 이 카드를 배경으로 흐리게(Dim) 처리할지 여부
+   */
+  readonly isDimmed?: boolean;
+  /** 현재 TTS가 단어 또는 완성된 전체 문장을 읽고 있는지 여부 */
+  readonly isSpeaking?: boolean;
   /** 카드를 탭했을 때 실행할 콜백 */
   readonly onSelect: (card: AacCard) => void;
   /** 커스텀 카드일 경우 삭제 버튼 클릭 콜백 (선택) */
@@ -22,19 +30,25 @@ export interface AacWordCardProps {
 }
 
 /**
- * @description [HR-01, HR-03, HR-05] 갤럭시 탭 S4 터치에 최적화된 개별 AAC 어휘/동작 카드 컴포넌트
- * - 명사(noun)는 따뜻한 크림/피치 테두리와 선명한 사물 일러스트를 표시합니다.
- * - 동사(verb)는 세이지 그린 테두리와 움직이는 GIF/모션 그래픽(AnimatedVerbGraphic)을 표시합니다.
+ * @description [HR-01, HR-03, HR-05] 자폐성 장애 아동의 전경·배경 분리를 돕는 AAC 어휘/동작 카드 컴포넌트
+ * - 선택된 카드(isSelected === true)만 선명하게 확대되며 애니메이션(명사 모션 / 동사 실제 동작)이 작동합니다.
+ * - 선택되지 않은 카드들은 정지 상태로 차분히 대기하며, 다른 카드가 선택되면 배경으로 흐려집니다(isDimmed).
  * @param {AacWordCardProps} props 컴포넌트 프로퍼티
  * @returns {React.ReactElement} 터치 가능한 AAC 카드 엘리먼트
  */
 export function AacWordCard({
   card,
   isSelected,
+  isDimmed = false,
+  isSpeaking = false,
   onSelect,
   onDeleteCustom,
 }: AacWordCardProps): React.ReactElement {
   const isVerb = card.partOfSpeech === 'verb';
+  const isNounAnimating = !isVerb && isSelected;
+  // 동사도 선택되었을 때(또는 문장 발화 중일 때)만 실제 동작 애니메이션 활성화!
+  const isVerbAnimating = isVerb && isSelected;
+
   const borderColor = isSelected
     ? WARM_PASTEL_COLORS.PRIMARY_BRAND
     : isVerb
@@ -50,6 +64,7 @@ export function AacWordCard({
       tabIndex={0}
       aria-label={`${card.label} 카드`}
       aria-pressed={isSelected}
+      data-dimmed={isDimmed ? 'true' : 'false'}
       onClick={() => onSelect(card)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -59,25 +74,26 @@ export function AacWordCard({
       }}
       style={{
         position: 'relative',
-        minHeight: TOUCH_METRICS.CARD_MIN_HEIGHT,
+        minHeight: TOUCH_METRICS.CARD_MIN_HEIGHT + 8,
         backgroundColor: isSelected ? '#FFF9F2' : '#FFFFFF',
         borderRadius: TOUCH_METRICS.CARD_BORDER_RADIUS,
-        border: `${isSelected ? 3 : 2}px solid ${borderColor}`,
+        border: `${isSelected ? 4 : 2}px solid ${borderColor}`,
         boxShadow: isSelected
-          ? '0 8px 18px rgba(255, 142, 110, 0.25)'
+          ? '0 10px 24px rgba(255, 142, 110, 0.32)'
           : '0 4px 10px rgba(61, 53, 46, 0.05)',
-        padding: '12px 8px',
+        padding: '14px 10px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        gap: 6,
         cursor: 'pointer',
-        transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
-        transform: isSelected ? 'scale(1.03)' : 'scale(1)',
+        opacity: isDimmed ? 0.36 : 1,
+        filter: isDimmed ? 'grayscale(30%)' : 'none',
+        transition: 'all 0.2s ease',
+        transform: isSelected ? 'scale(1.05)' : 'scale(1)',
       }}
     >
-      {/* 치료사가 직접 추가한 커스텀 카드 삭제 버튼 */}
       {card.isCustom && onDeleteCustom && (
         <Button
           type="text"
@@ -93,8 +109,7 @@ export function AacWordCard({
         />
       )}
 
-      {/* 동사일 경우 움직이는 GIF 모션 배지 표시 */}
-      {isVerb && (
+      {isSelected && (
         <span
           style={{
             position: 'absolute',
@@ -102,42 +117,49 @@ export function AacWordCard({
             left: 8,
             fontSize: 11,
             fontWeight: 700,
-            padding: '2px 7px',
+            padding: '2px 8px',
             borderRadius: 10,
             backgroundColor: badgeBgColor,
             color: badgeTextColor,
           }}
         >
-          GIF 동작
+          {isSpeaking ? '🔊 발화 중' : '✨ 선택됨'}
         </span>
       )}
 
-      {/* 중앙 시각 심볼: 동사는 움직이는 GIF/모션 그래픽, 명사는 사물 이미지/이모지 */}
-      <div style={{ minHeight: 68, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* 중앙 시각 영역: 선택된 카드만 모션이 활성화되어 아동의 주의 집중 유도 */}
+      <div style={{ minHeight: 74, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {isVerb ? (
           <AnimatedVerbGraphic
             emoji={card.emoji}
             label={card.label}
             motionType={card.motionType}
             customImageUrl={card.customImageUrl}
-            size={54}
+            size={68}
+            isActive={isVerbAnimating}
           />
         ) : card.customImageUrl ? (
           <img
             src={card.customImageUrl}
             alt={card.label}
+            className={isNounAnimating ? 'noun-active-motion' : undefined}
             style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 14 }}
           />
         ) : (
-          <span style={{ fontSize: 48, lineHeight: 1 }}>{card.emoji}</span>
+          <span
+            data-testid={`noun-symbol-${card.id}`}
+            className={isNounAnimating ? 'noun-active-motion' : undefined}
+            style={{ fontSize: 52, lineHeight: 1 }}
+          >
+            {card.emoji}
+          </span>
         )}
       </div>
 
-      {/* 하단 한글 어휘 라벨 */}
       <Text
         strong
         style={{
-          fontSize: 19,
+          fontSize: 20,
           color: WARM_PASTEL_COLORS.TEXT_PRIMARY,
           textAlign: 'center',
           wordBreak: 'keep-all',
@@ -148,4 +170,3 @@ export function AacWordCard({
     </div>
   );
 }
-

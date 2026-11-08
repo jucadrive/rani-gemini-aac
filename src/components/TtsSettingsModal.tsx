@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button, Form, Modal, Select, Slider, Switch, Typography } from 'antd';
+import { Button, Form, Modal, Radio, Select, Slider, Switch, Typography } from 'antd';
 import { SoundFilled } from '@ant-design/icons';
-import { TtsSettings } from '../types/aac';
+import { NounDisplayLimit, TtsSettings } from '../types/aac';
 
 const { Text } = Typography;
 
@@ -11,7 +11,7 @@ const { Text } = Typography;
 export interface TtsSettingsModalProps {
   /** 모달 열림 여부 */
   readonly open: boolean;
-  /** 현재 TTS 설정값 */
+  /** 현재 TTS 및 명사 노출 개수 설정값 */
   readonly settings: TtsSettings;
   /** 기기에서 사용 가능한 한국어 음성 목록 */
   readonly koreanVoices: readonly SpeechSynthesisVoice[];
@@ -23,10 +23,19 @@ export interface TtsSettingsModalProps {
   readonly onClose: () => void;
 }
 
+const DISPLAY_LIMIT_OPTIONS: { label: string; value: NounDisplayLimit }[] = [
+  { label: '2개 (초기 집중)', value: 2 },
+  { label: '4개 (기본 권장)', value: 4 },
+  { label: '6개 (확장)', value: 6 },
+  { label: '8개 (심화)', value: 8 },
+  { label: '전체 보기', value: 99 },
+];
+
 /**
- * @description [HR-01, HR-03, HR-05] 치료사가 아동의 청각 인지 속도에 맞춰 TTS 음성 엔진, 속도, 음높이를 조절하는 모달
+ * @description [HR-01, HR-03, HR-05] 치료사가 자폐 아동의 시각 집중력에 맞춰
+ * '한 화면 명사 노출 개수'와 '고품질 TTS 음성·속도'를 조절하는 설정 모달 컴포넌트
  * @param {TtsSettingsModalProps} props 컴포넌트 프로퍼티
- * @returns {React.ReactElement} TTS 음성 설정 모달 엘리먼트
+ * @returns {React.ReactElement} 치료 환경 및 TTS 설정 모달 엘리먼트
  */
 export function TtsSettingsModal({
   open,
@@ -38,7 +47,7 @@ export function TtsSettingsModal({
 }: TtsSettingsModalProps): React.ReactElement {
   return (
     <Modal
-      title="🔊 고품질 한국어 음성(TTS) 세부 설정"
+      title="⚙️ 치료 화면(명사 개수) 및 음성(TTS) 설정"
       open={open}
       onCancel={onClose}
       footer={[
@@ -55,7 +64,21 @@ export function TtsSettingsModal({
       ]}
     >
       <Form layout="vertical">
-        <Form.Item label="한국어 목소리 엔진 선택 (고품질 신경망/삼성/구글 음성 자동 추천)">
+        <Form.Item
+          label="1. 한 화면에 제시할 명사 카드 개수 (전경·배경 분리 및 주의 집중 조절)"
+        >
+          <Radio.Group
+            optionType="button"
+            buttonStyle="solid"
+            value={settings.nounDisplayLimit}
+            options={DISPLAY_LIMIT_OPTIONS}
+            onChange={(e) =>
+              onUpdateSettings({ nounDisplayLimit: e.target.value as NounDisplayLimit })
+            }
+          />
+        </Form.Item>
+
+        <Form.Item label="2. 한국어 목소리 엔진 선택 (고품질 신경망/삼성/구글 음성 자동 추천)">
           <Select
             placeholder="자동 (가장 자연스러운 한국어 고품질 음성)"
             value={settings.preferredVoiceURI || ''}
@@ -73,7 +96,7 @@ export function TtsSettingsModal({
         </Form.Item>
 
         <Form.Item
-          label={`말하기 속도 (${settings.rate.toFixed(2)}배속 — 언어치료 권장: 0.85 ~ 0.95)`}
+          label={`3. 말하기 속도 (${settings.rate.toFixed(2)}배속 — 언어치료 권장: 0.85 ~ 0.95)`}
         >
           <Slider
             min={0.6}
@@ -89,7 +112,7 @@ export function TtsSettingsModal({
           />
         </Form.Item>
 
-        <Form.Item label={`목소리 톤 / 음높이 (${settings.pitch.toFixed(2)})`}>
+        <Form.Item label={`4. 목소리 톤 / 음높이 (${settings.pitch.toFixed(2)})`}>
           <Slider
             min={0.8}
             max={1.3}
@@ -104,10 +127,10 @@ export function TtsSettingsModal({
           />
         </Form.Item>
 
-        <Form.Item label="동사 탭 시 전체 문장 자동 이어읽기">
+        <Form.Item label="5. 동사 탭 시 전체 문장 자동 이어읽기">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text type="secondary">
-              예: ‘빵’ 선택 후 ‘주세요’를 누르면 “주세요” 발화 직후 “빵 주세요”를 이어서 읽어줍니다.
+              ‘빵’ 선택 후 ‘주세요’를 누르면 “주세요” 발화 직후 “빵 주세요”를 이어 읽어줍니다.
             </Text>
             <Switch
               checked={settings.autoReadCompletedSentence}
@@ -121,4 +144,3 @@ export function TtsSettingsModal({
     </Modal>
   );
 }
-

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Modal, Radio, Select, Space, Typography } from 'antd';
-import { PictureOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Modal, Radio, Select, Space } from 'antd';
+import { useCamera } from '../hooks/useCamera';
 import { AacCard, NounCategory, NounCategoryId, VerbMotionType } from '../types/aac';
 import { PartOfSpeech } from '../types/common';
 import { CUSTOM_CARD_SAMPLE_EMOJIS, VERB_MOTION_OPTIONS } from '../utils/aacTemplates';
-
-const { Text } = Typography;
+import { PhotoCaptureControl } from './PhotoCaptureControl';
 
 /**
  * @description AddCustomCardModal 컴포넌트의 Props 인터페이스
@@ -24,7 +23,7 @@ export interface AddCustomCardModalProps {
 }
 
 /**
- * @description [HR-01, HR-03, HR-05] 치료사가 아동 맞춤형 명사/동사 카드(외부 사진 및 움직이는 GIF 포함)를 추가하는 모달
+ * @description [HR-01, HR-03, HR-05] 치료사가 아동 맞춤형 명사/동사 카드(사진첩 업로드 및 실시간 카메라 촬영 포함)를 추가하는 모달
  * @param {AddCustomCardModalProps} props 컴포넌트 프로퍼티
  * @returns {React.ReactElement} 커스텀 카드 추가 모달 엘리먼트
  */
@@ -43,17 +42,25 @@ export function AddCustomCardModal({
   const [motionType, setMotionType] = useState<VerbMotionType>('begging');
   const [customImageUrl, setCustomImageUrl] = useState<string>('');
 
-  /** 이미지 또는 움직이는 GIF 파일 업로드 시 Data URL로 변환하는 핸들러 */
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setCustomImageUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+  const {
+    isCameraOpen,
+    isLoadingCamera,
+    facingMode,
+    cameraError,
+    videoRef,
+    openCamera,
+    closeCamera,
+    toggleFacingMode,
+    capturePhoto,
+    handleGalleryFile,
+    clearCameraError,
+  } = useCamera();
+
+  /** 모달 닫기 시 카메라 스트림을 안전하게 종료하는 핸들러 */
+  const handleCancel = (): void => {
+    closeCamera();
+    clearCameraError();
+    onClose();
   };
 
   /** 입력값을 검증하고 새 AAC 카드를 생성하여 상위 컨테이너에 전달하는 핸들러 */
@@ -73,6 +80,8 @@ export function AddCustomCardModal({
       isCustom: true,
     };
 
+    closeCamera();
+    clearCameraError();
     onAddCard(newCard);
     setLabel('');
     setSpeechText('');
@@ -84,11 +93,12 @@ export function AddCustomCardModal({
     <Modal
       title="✨ 아동 맞춤형 새 어휘·동작 카드 만들기"
       open={open}
-      onCancel={onClose}
+      onCancel={handleCancel}
       onOk={handleSubmit}
       okText="카드 추가하기"
       cancelText="취소"
       okButtonProps={{ disabled: !label.trim() }}
+      width={560}
       destroyOnClose
     >
       <Form layout="vertical">
@@ -99,7 +109,7 @@ export function AddCustomCardModal({
             buttonStyle="solid"
           >
             <Radio.Button value="noun">🥐 명사 (왼쪽 사물·음식 칸)</Radio.Button>
-            <Radio.Button value="verb">🤲 동사 (오른쪽 GIF 동작 칸)</Radio.Button>
+            <Radio.Button value="verb">🤲 동사 (오른쪽 동작 칸)</Radio.Button>
           </Radio.Group>
         </Form.Item>
 
@@ -108,23 +118,16 @@ export function AddCustomCardModal({
             <Select
               value={categoryId}
               onChange={(val) => setCategoryId(val)}
-              options={categories.map((c) => ({
-                value: c.id,
-                label: `${c.iconEmoji} ${c.label}`,
-              }))}
+              options={categories.map((c) => ({ value: c.id, label: `${c.iconEmoji} ${c.label}` }))}
             />
           </Form.Item>
         ) : (
-          <Form.Item label="2. 동사 움직임(GIF 모션) 선택">
-            <Select
-              value={motionType}
-              onChange={(val) => setMotionType(val)}
-              options={VERB_MOTION_OPTIONS}
-            />
+          <Form.Item label="2. 동사 움직임(동작 모션) 선택">
+            <Select value={motionType} onChange={(val) => setMotionType(val)} options={VERB_MOTION_OPTIONS} />
           </Form.Item>
         )}
 
-        <Form.Item label="3. 카드에 표시할 글자 (예: 딸기, 안아주세요)" required>
+        <Form.Item label="3. 카드에 표시할 글자 (예: 내 물컵, 엄마, 과자)" required>
           <Input
             placeholder="아동에게 보여줄 단어를 입력하세요"
             value={label}
@@ -133,15 +136,11 @@ export function AddCustomCardModal({
         </Form.Item>
 
         <Form.Item label="4. 음성(TTS)으로 읽어줄 발음 (비워두면 카드 글자와 동일)">
-          <Input
-            placeholder="예: 딸기"
-            value={speechText}
-            onChange={(e) => setSpeechText(e.target.value)}
-          />
+          <Input placeholder="예: 물컵" value={speechText} onChange={(e) => setSpeechText(e.target.value)} />
         </Form.Item>
 
-        <Form.Item label="5. 아이콘 선택 또는 실제 사진 / 움직이는 GIF 파일 등록">
-          <Space wrap style={{ marginBottom: 8 }}>
+        <Form.Item label="5. 기본 아이콘 선택 또는 사진첩 / 실시간 카메라로 직접 찍기">
+          <Space wrap style={{ marginBottom: 10 }}>
             {CUSTOM_CARD_SAMPLE_EMOJIS.map((item) => (
               <Button
                 key={item}
@@ -155,33 +154,21 @@ export function AddCustomCardModal({
               </Button>
             ))}
           </Space>
-          <div>
-            <label style={{ cursor: 'pointer', display: 'inline-block' }}>
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  border: '1px dashed #d9d9d9',
-                  borderRadius: 8,
-                }}
-              >
-                <PictureOutlined /> 갤러리에서 사진 또는 움짤(.gif) 불러오기
-              </span>
-              <input
-                type="file"
-                accept="image/*,.gif"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-            </label>
-            {customImageUrl && (
-              <Text type="success" style={{ marginLeft: 10 }}>
-                ✓ 이미지/GIF 선택됨
-              </Text>
-            )}
-          </div>
+
+          <PhotoCaptureControl
+            customImageUrl={customImageUrl}
+            isCameraOpen={isCameraOpen}
+            isLoadingCamera={isLoadingCamera}
+            facingMode={facingMode}
+            cameraError={cameraError}
+            videoRef={videoRef}
+            onOpenCamera={() => void openCamera()}
+            onCloseCamera={closeCamera}
+            onToggleFacingMode={() => void toggleFacingMode()}
+            onCapturePhoto={() => capturePhoto((url) => setCustomImageUrl(url))}
+            onSelectFile={(file) => void handleGalleryFile(file, (url) => setCustomImageUrl(url))}
+            onClearPhoto={() => setCustomImageUrl('')}
+          />
         </Form.Item>
       </Form>
     </Modal>

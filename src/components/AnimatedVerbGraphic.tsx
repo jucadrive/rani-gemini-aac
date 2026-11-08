@@ -1,12 +1,35 @@
 import React from 'react';
 import { VerbMotionType } from '../types/aac';
+import {
+  BeggingScene,
+  DrinkingScene,
+  EatingScene,
+  MoreScene,
+  PlayingScene,
+} from './VerbActionScenesA';
+import {
+  GreetingScene,
+  HelpingScene,
+  OpeningScene,
+  RefusingScene,
+} from './VerbActionScenesB';
+import {
+  GoingScene,
+  PuttingInScene,
+  RidingScene,
+  TakingOutScene,
+  TearingScene,
+  WashingScene,
+  WatchingScene,
+  WearingScene,
+} from './VerbActionScenesC';
 import '../assets/verbMotions.css';
 
 /**
  * @description AnimatedVerbGraphic 컴포넌트의 Props 인터페이스
  */
 export interface AnimatedVerbGraphicProps {
-  /** 카드 대표 이모지 심볼 */
+  /** 카드 대표 이모지 심볼 (폴백용) */
   readonly emoji: string;
   /** 카드 한글 라벨 (대체 텍스트용) */
   readonly label: string;
@@ -14,100 +37,103 @@ export interface AnimatedVerbGraphicProps {
   readonly motionType?: VerbMotionType;
   /** 치료사가 등록한 커스텀 GIF/이미지 URL (선택) */
   readonly customImageUrl?: string;
-  /** 그래픽 크기 (px, 기본값 56) */
+  /** 그래픽 크기 (px, 기본값 68) */
   readonly size?: number;
+  /** 현재 이 동사가 선택(활성화)되었는지 여부 */
+  readonly isActive?: boolean;
 }
 
 /**
- * 모션 타입별 보조 동작 힌트 아이콘 매핑
- */
-const MOTION_SUB_BADGE: Record<VerbMotionType, string> = {
-  begging: '✨',
-  more: '➕',
-  eating: '😋',
-  drinking: '💧',
-  playing: '🎵',
-  opening: '🔓',
-  helping: '💛',
-  refusing: '✋',
-  greeting: '😊',
-};
-
-/**
- * @description [HR-01, HR-03, HR-05] 동사(동작) 카드를 움직이는 GIF + 루프 모션으로 렌더링하는 순수 컴포넌트
- * 생성된 실제 .gif 애니메이션 배경 링과 부드러운 60fps 모션 심볼을 결합하여
- * 아동이 동사의 움직임('주세요', '먹어요', '마셔요' 등)을 직관적으로 인지하도록 돕습니다.
+ * @description [HR-01, HR-03, HR-05] 17종의 고빈도 동사(주세요, 먹어요, 타요, 꺼내요, 뜯어요, 가요, 열어요 등)를
+ * 실제 행동 과정 일러스트로 렌더링하며, 선택된 동사(isActive === true)만 애니메이션을 동작시키는 컴포넌트
  * @param {AnimatedVerbGraphicProps} props 컴포넌트 프로퍼티
- * @returns {React.ReactElement} 움직이는 동사 그래픽 엘리먼트
+ * @returns {React.ReactElement} 리얼 동사 동작 그래픽 엘리먼트
  */
 export function AnimatedVerbGraphic({
-  emoji,
   label,
   motionType = 'begging',
   customImageUrl,
-  size = 56,
+  size = 68,
+  isActive = true,
 }: AnimatedVerbGraphicProps): React.ReactElement {
-  const gifSrc = customImageUrl || `/gifs/${motionType}.gif`;
-  const motionClass = `verb-motion-${motionType}`;
-  const subBadge = MOTION_SUB_BADGE[motionType];
+  if (customImageUrl) {
+    return (
+      <div
+        aria-label={`${label} 동작 애니메이션`}
+        style={{
+          width: size,
+          height: size,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: isActive ? 1 : 0.85,
+        }}
+      >
+        <img
+          src={customImageUrl}
+          alt={`${label} 움직이는 GIF`}
+          style={{ width: '100%', height: '100%', borderRadius: 16, objectFit: 'cover' }}
+        />
+      </div>
+    );
+  }
+
+  /** motionType에 따른 17종의 리얼 동작 장면(Multi-part Action Scene) 매핑 */
+  const renderScene = (): React.ReactElement => {
+    switch (motionType) {
+      case 'begging':
+        return <BeggingScene size={size} />;
+      case 'more':
+        return <MoreScene size={size} />;
+      case 'eating':
+        return <EatingScene size={size} />;
+      case 'drinking':
+        return <DrinkingScene size={size} />;
+      case 'playing':
+        return <PlayingScene size={size} />;
+      case 'opening':
+        return <OpeningScene size={size} />;
+      case 'helping':
+        return <HelpingScene size={size} />;
+      case 'refusing':
+        return <RefusingScene size={size} />;
+      case 'greeting':
+        return <GreetingScene size={size} />;
+      case 'riding':
+        return <RidingScene size={size} />;
+      case 'takingOut':
+        return <TakingOutScene size={size} />;
+      case 'tearing':
+        return <TearingScene size={size} />;
+      case 'going':
+        return <GoingScene size={size} />;
+      case 'puttingIn':
+        return <PuttingInScene size={size} />;
+      case 'wearing':
+        return <WearingScene size={size} />;
+      case 'washing':
+        return <WashingScene size={size} />;
+      case 'watching':
+        return <WatchingScene size={size} />;
+      default:
+        return <BeggingScene size={size} />;
+    }
+  };
 
   return (
     <div
       aria-label={`${label} 동작 애니메이션`}
+      data-active={isActive ? 'true' : 'false'}
+      className={isActive ? 'verb-graphic-active' : 'verb-graphic-paused'}
       style={{
-        position: 'relative',
-        width: size + 18,
-        height: size + 18,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
+        transition: 'transform 0.2s ease',
+        transform: isActive ? 'scale(1.08)' : 'scale(1)',
       }}
     >
-      {/* 실제 멀티프레임 루프 .gif 배경 오라(Aura) 레이어 */}
-      <img
-        src={gifSrc}
-        alt={`${label} 움직이는 GIF`}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          borderRadius: '50%',
-          objectFit: 'cover',
-          opacity: customImageUrl ? 1 : 0.38,
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* 커스텀 GIF가 없을 때 고해상도 벡터/심볼 모션을 전면에 표시 */}
-      {!customImageUrl && (
-        <div
-          className={motionClass}
-          style={{
-            position: 'relative',
-            zIndex: 1,
-            fontSize: size * 0.72,
-            lineHeight: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            filter: 'drop-shadow(0 3px 6px rgba(46, 158, 107, 0.18))',
-          }}
-        >
-          <span>{emoji}</span>
-          <span
-            style={{
-              position: 'absolute',
-              top: -6,
-              right: -10,
-              fontSize: size * 0.3,
-            }}
-          >
-            {subBadge}
-          </span>
-        </div>
-      )}
+      {renderScene()}
     </div>
   );
 }
-

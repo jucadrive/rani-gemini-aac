@@ -59,3 +59,12 @@ export const DEFAULT_TTS_CONFIG = {
   AUTO_SENTENCE_DELAY_MS: 450,
 } as const;
 
+/** 사진첩 이미지 및 실시간 카메라 촬영 썸네일 압축 설정 상수 */
+export const PHOTO_CAPTURE_CONFIG = {
+  /** 로컬 스토리지 용량 보호를 위한 정사각형 썸네일 최대 해상도 (px) */
+  THUMBNAIL_SIZE: 320,
+  /** JPEG 압축 품질 (0.0 ~ 1.0) */
+  JPEG_QUALITY: 0.85,
+} as const;
+
+

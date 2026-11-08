@@ -13,9 +13,7 @@ let sentenceTimerId: ReturnType<typeof setTimeout> | null = null;
  * @param speakingText 현재 읽고 있는 한국어 텍스트
  */
 function notifyStatus(isSpeaking: boolean, speakingText: string): void {
-  listeners.forEach((listener) => {
-    listener({ isSpeaking, speakingText });
-  });
+  listeners.forEach((listener) => listener({ isSpeaking, speakingText }));
 }
 
 /**
@@ -152,16 +150,19 @@ export function speakText(
 }
 
 /**
- * @description 개별 카드("주세요") 발화 직후 완성된 전체 문장("빵 주세요")을 자연스러운 호흡 간격 뒤 이어서 발화합니다.
- * @param wordText 방금 탭한 카드의 단어 (예: '주세요')
- * @param fullSentenceText 조합 완성된 전체 문장 (예: '빵 주세요')
+ * @description 개별 카드("먹어요") 발화 -> 1차 카드 조합 문장("빵 먹어요") 발화 ->
+ * 통합 동작 그림 전환 콜백 실행 후 2차 문장("빵 먹어요") 재발화를 순차 실행합니다.
+ * @param wordText 방금 탭한 동사 단어 (예: '먹어요')
+ * @param fullSentenceText 조합 완성된 전체 문장 (예: '빵 먹어요')
  * @param settings TTS 설정 객체
+ * @param onMergedStageReached 통합 동작 그림(merged) 단계로 전환할 때 실행할 콜백 (선택)
  * @returns {Result<boolean, AppError>} 발화 스케줄링 성공 여부
  */
 export function speakWordThenSentence(
   wordText: string,
   fullSentenceText: string,
-  settings: Partial<TtsSettings> = {}
+  settings: Partial<TtsSettings> = {},
+  onMergedStageReached?: () => void
 ): Result<boolean, AppError> {
   const shouldAutoRead = settings.autoReadCompletedSentence ?? true;
   const cleanWord = wordText.trim();
@@ -173,7 +174,14 @@ export function speakWordThenSentence(
 
   return speakText(cleanWord, settings, () => {
     sentenceTimerId = setTimeout(() => {
-      speakText(cleanSentence, settings);
+      // 1차: [빵 그림 + 먹는 그림] 카드 조합 상태에서 "빵 먹어요" 발화
+      speakText(cleanSentence, settings, () => {
+        sentenceTimerId = setTimeout(() => {
+          // 2차: 실제로 빵을 먹는 '하나의 동작 그림'으로 전환하며 다시 "빵 먹어요" 발화!
+          if (onMergedStageReached) onMergedStageReached();
+          speakText(cleanSentence, settings);
+        }, 650);
+      });
     }, DEFAULT_TTS_CONFIG.AUTO_SENTENCE_DELAY_MS);
   });
 }
@@ -185,7 +193,5 @@ export function speakWordThenSentence(
  */
 export function subscribeTtsStatus(listener: TtsStatusListener): () => void {
   listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+  return () => listeners.delete(listener);
 }

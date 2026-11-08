@@ -20,8 +20,12 @@ export interface UseTtsReturn {
   readonly koreanVoices: SpeechSynthesisVoice[];
   /** 단일 어휘 또는 문장을 즉시 발화하는 함수 */
   readonly speak: (text: string) => void;
-  /** 방금 누른 동사('주세요') 발화 후 완성된 문장('빵 주세요')을 연속 발화하는 함수 */
-  readonly speakWithSentence: (wordText: string, fullSentenceText: string) => void;
+  /** 방금 누른 동사('먹어요') 발화 -> 1차 조합 문장('빵 먹어요') -> 통합 동작 전환 후 2차('빵 먹어요') 재발화 */
+  readonly speakWithSentence: (
+    wordText: string,
+    fullSentenceText: string,
+    onMergedStageReached?: () => void
+  ) => void;
   /** 현재 출력 중인 음성을 즉시 중지하는 함수 */
   readonly stop: () => void;
 }
@@ -72,8 +76,8 @@ export function useTTS(settings: Partial<TtsSettings> = {}): UseTtsReturn {
   );
 
   const speakWithSentence = useCallback(
-    (wordText: string, fullSentenceText: string): void => {
-      speakWordThenSentence(wordText, fullSentenceText, settings);
+    (wordText: string, fullSentenceText: string, onMergedStageReached?: () => void): void => {
+      speakWordThenSentence(wordText, fullSentenceText, settings, onMergedStageReached);
     },
     [settings]
   );

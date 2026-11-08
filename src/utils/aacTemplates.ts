@@ -1,4 +1,4 @@
-import { AacCard, NounCategory, VerbMotionType } from '../types/aac';
+import { AacCard, FavoriteSentence, NounCategory, VerbMotionType } from '../types/aac';
 
 /**
  * @description 커스텀 카드 추가 모달에서 제공하는 빠른 선택용 친근한 이모지 목록
@@ -8,18 +8,26 @@ export const CUSTOM_CARD_SAMPLE_EMOJIS: readonly string[] = [
 ] as const;
 
 /**
- * @description 동사 커스텀 카드 생성 시 선택할 수 있는 9가지 GIF 모션 옵션 목록
+ * @description 동사 커스텀 카드 생성 시 선택할 수 있는 17가지 실제 동작 모션 옵션 목록
  */
 export const VERB_MOTION_OPTIONS: { value: VerbMotionType; label: string }[] = [
-  { value: 'begging', label: '🤲 두 손 모아 달라고 하기 (주세요)' },
-  { value: 'more', label: '➕ 하나 더 요청하기 (더 주세요)' },
-  { value: 'eating', label: '🥄 숟가락으로 먹기 (먹어요)' },
-  { value: 'drinking', label: '🥤 컵 기울여 마시기 (마셔요)' },
-  { value: 'playing', label: '🎈 신나게 통통 튀기 (하고 싶어요)' },
-  { value: 'opening', label: '📦 양옆으로 열기 (열어 주세요)' },
-  { value: 'helping', label: '🤝 손 내밀어 도움 요청 (도와주세요)' },
-  { value: 'refusing', label: '🙅 가로저으며 거절 (싫어요)' },
-  { value: 'greeting', label: '👋 손 흔들며 인사 (안녕하세요)' },
+  { value: 'begging', label: '🤲 주세요 (두 손 모아 받기)' },
+  { value: 'eating', label: '🥄 먹어요 (입 벌려 먹기)' },
+  { value: 'drinking', label: '🥤 마셔요 (컵 기울여 마시기)' },
+  { value: 'riding', label: '🚗 타요 (탈것에 올라타 달리기)' },
+  { value: 'takingOut', label: '📤 꺼내요 (상자/가방에서 꺼내기)' },
+  { value: 'tearing', label: '🍬 뜯어요 (포장지 양옆으로 뜯기)' },
+  { value: 'going', label: '🚶 가요 (목적지를 향해 걸어가기)' },
+  { value: 'opening', label: '🚪 열어요 (뚜껑/문 활짝 열기)' },
+  { value: 'puttingIn', label: '📥 넣어요 (상자/바구니 안에 넣기)' },
+  { value: 'wearing', label: '👕 입어요·신어요 (옷/신발 착용하기)' },
+  { value: 'washing', label: '🫧 씻어요 (비누거품으로 씻기)' },
+  { value: 'watching', label: '👀 봐요 (집중해서 바라보기)' },
+  { value: 'playing', label: '🎈 하고 싶어요·놀아요 (점프하며 놀기)' },
+  { value: 'more', label: '➕ 더 주세요 (하나 더 추가하기)' },
+  { value: 'helping', label: '🤝 도와주세요 (두 손 맞잡기)' },
+  { value: 'refusing', label: '🙅 싫어요 (고개 저으며 거절)' },
+  { value: 'greeting', label: '👋 안녕하세요 (손 흔들며 인사)' },
 ];
 
 /**
@@ -34,10 +42,10 @@ export const NOUN_CATEGORIES: readonly NounCategory[] = [
 ] as const;
 
 /**
- * @description 좌측 보드에 카테고리별로 표시될 기본 명사(무엇을?) 어휘 템플릿 30종
+ * @description 좌측 보드에 카테고리별로 표시될 기본 명사(무엇을?) 어휘 템플릿 32종
  */
 export const DEFAULT_NOUN_CARDS: readonly AacCard[] = [
-  // 1. 간식·음식 (food) - 여자친구분 예시 '빵'을 첫 번째로 배치!
+  // 1. 간식·음식 (food)
   { id: 'noun-bread', label: '빵', speechText: '빵', partOfSpeech: 'noun', categoryId: 'food', emoji: '🥐' },
   { id: 'noun-milk', label: '우유', speechText: '우유', partOfSpeech: 'noun', categoryId: 'food', emoji: '🥛' },
   { id: 'noun-water', label: '물', speechText: '물', partOfSpeech: 'noun', categoryId: 'food', emoji: '💧' },
@@ -81,79 +89,44 @@ export const DEFAULT_NOUN_CARDS: readonly AacCard[] = [
 ] as const;
 
 /**
- * @description 우측 보드에 항상 고정되어 움직이는 GIF/모션으로 표시될 핵심 동사·서술어 9종
+ * @description 언어재활 현장의 고빈도 동사·서술어 18종 (타다, 꺼내다, 뜯다, 가다, 열다, 넣다, 입다, 씻다, 보다 포함!)
  */
 export const DEFAULT_VERB_CARDS: readonly AacCard[] = [
+  // 1페이지: 최우선 핵심 고빈도 동사 9종 (주세요, 먹어요, 마셔요, 타요, 꺼내요, 뜯어요, 가요, 열어요, 더 주세요)
+  { id: 'verb-give', label: '주세요', speechText: '주세요', partOfSpeech: 'verb', emoji: '🤲', motionType: 'begging' },
+  { id: 'verb-eat', label: '먹어요', speechText: '먹어요', partOfSpeech: 'verb', emoji: '🥄', motionType: 'eating' },
+  { id: 'verb-drink', label: '마셔요', speechText: '마셔요', partOfSpeech: 'verb', emoji: '🥤', motionType: 'drinking' },
+  { id: 'verb-ride', label: '타요', speechText: '타요', partOfSpeech: 'verb', emoji: '🚗', motionType: 'riding' },
+  { id: 'verb-takeout', label: '꺼내요', speechText: '꺼내요', partOfSpeech: 'verb', emoji: '📤', motionType: 'takingOut' },
+  { id: 'verb-tear', label: '뜯어요', speechText: '뜯어요', partOfSpeech: 'verb', emoji: '🍬', motionType: 'tearing' },
+  { id: 'verb-go', label: '가요', speechText: '가요', partOfSpeech: 'verb', emoji: '🚶', motionType: 'going' },
+  { id: 'verb-open', label: '열어요', speechText: '열어요', partOfSpeech: 'verb', emoji: '🚪', motionType: 'opening' },
+  { id: 'verb-more', label: '더 주세요', speechText: '더 주세요', partOfSpeech: 'verb', emoji: '➕', motionType: 'more' },
+
+  // 2페이지: 확장 고빈도 동사 9종 (넣어요, 입어요, 신어요, 씻어요, 봐요, 하고 싶어요, 도와주세요, 싫어요, 안녕하세요)
+  { id: 'verb-putin', label: '넣어요', speechText: '넣어요', partOfSpeech: 'verb', emoji: '📥', motionType: 'puttingIn' },
+  { id: 'verb-wear', label: '입어요', speechText: '입어요', partOfSpeech: 'verb', emoji: '👕', motionType: 'wearing' },
+  { id: 'verb-shoes-on', label: '신어요', speechText: '신어요', partOfSpeech: 'verb', emoji: '👟', motionType: 'wearing' },
+  { id: 'verb-wash', label: '씻어요', speechText: '씻어요', partOfSpeech: 'verb', emoji: '🫧', motionType: 'washing' },
+  { id: 'verb-watch', label: '봐요', speechText: '봐요', partOfSpeech: 'verb', emoji: '👀', motionType: 'watching' },
+  { id: 'verb-play', label: '하고 싶어요', speechText: '하고 싶어요', partOfSpeech: 'verb', emoji: '🎈', motionType: 'playing' },
+  { id: 'verb-help', label: '도와주세요', speechText: '도와주세요', partOfSpeech: 'verb', emoji: '🤝', motionType: 'helping' },
+  { id: 'verb-refuse', label: '싫어요', speechText: '싫어요', partOfSpeech: 'verb', emoji: '🙅', motionType: 'refusing' },
+  { id: 'verb-greet', label: '안녕하세요', speechText: '안녕하세요', partOfSpeech: 'verb', emoji: '👋', motionType: 'greeting' },
+] as const;
+
+/**
+ * @description 즐겨찾기 챕터에 기본으로 탑재되는 자주 쓰는 핵심 표현 샘플 2종
+ */
+export const DEFAULT_FAVORITE_SENTENCES: readonly FavoriteSentence[] = [
   {
-    id: 'verb-give',
-    label: '주세요',
-    speechText: '주세요',
-    partOfSpeech: 'verb',
-    emoji: '🤲',
-    motionType: 'begging',
+    id: 'fav-bread-give',
+    sentenceText: '빵 주세요',
+    cards: [DEFAULT_NOUN_CARDS[0], DEFAULT_VERB_CARDS[0]],
   },
   {
-    id: 'verb-more',
-    label: '더 주세요',
-    speechText: '더 주세요',
-    partOfSpeech: 'verb',
-    emoji: '➕',
-    motionType: 'more',
-  },
-  {
-    id: 'verb-eat',
-    label: '먹어요',
-    speechText: '먹어요',
-    partOfSpeech: 'verb',
-    emoji: '🥄',
-    motionType: 'eating',
-  },
-  {
-    id: 'verb-drink',
-    label: '마셔요',
-    speechText: '마셔요',
-    partOfSpeech: 'verb',
-    emoji: '🥤',
-    motionType: 'drinking',
-  },
-  {
-    id: 'verb-play',
-    label: '하고 싶어요',
-    speechText: '하고 싶어요',
-    partOfSpeech: 'verb',
-    emoji: '🎈',
-    motionType: 'playing',
-  },
-  {
-    id: 'verb-open',
-    label: '열어 주세요',
-    speechText: '열어 주세요',
-    partOfSpeech: 'verb',
-    emoji: '📦',
-    motionType: 'opening',
-  },
-  {
-    id: 'verb-help',
-    label: '도와주세요',
-    speechText: '도와주세요',
-    partOfSpeech: 'verb',
-    emoji: '🤝',
-    motionType: 'helping',
-  },
-  {
-    id: 'verb-refuse',
-    label: '싫어요',
-    speechText: '싫어요',
-    partOfSpeech: 'verb',
-    emoji: '🙅',
-    motionType: 'refusing',
-  },
-  {
-    id: 'verb-greet',
-    label: '안녕하세요',
-    speechText: '안녕하세요',
-    partOfSpeech: 'verb',
-    emoji: '👋',
-    motionType: 'greeting',
+    id: 'fav-water-drink',
+    sentenceText: '물 마셔요',
+    cards: [DEFAULT_NOUN_CARDS[2], DEFAULT_VERB_CARDS[2]],
   },
 ] as const;
