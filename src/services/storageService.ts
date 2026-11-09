@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   TTS_SETTINGS: 'aac_app_tts_settings_v1',
   CUSTOM_CARDS: 'aac_app_custom_cards_v1',
   FAVORITE_SENTENCES: 'aac_app_favorite_sentences_v1',
+  RECORDED_VOICES: 'aac_app_recorded_voices_v1',
 } as const;
 
 /**

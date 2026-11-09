@@ -123,6 +123,19 @@ describe('Phase 2: 고품질 한국어 TTS 서비스 및 로컬 스토리지 검
     expect(spokenUtterances[1].text).toBe('빵 주세요');
   });
 
+  it('연속 다시 보기(동일 문장 전달) 시 1단계에서 명사+동사 전체 문장을 발화한 뒤 2단계 통합 동작 전환 콜백을 호출해야 한다', () => {
+    const onMerged = vi.fn();
+    speakWordThenSentence('비눗방울 하고 싶어요', '비눗방울 하고 싶어요', { autoReadCompletedSentence: true }, onMerged);
+
+    expect(spokenUtterances).toHaveLength(1);
+    expect(spokenUtterances[0].text).toBe('비눗방울 하고 싶어요');
+
+    if (spokenUtterances[0].onend) spokenUtterances[0].onend();
+    vi.advanceTimersByTime(700);
+
+    expect(onMerged).toHaveBeenCalledTimes(1);
+  });
+
   it('storageService가 데이터를 안전하게 저장, 조회, 삭제하고 Result 객체를 반환해야 한다', () => {
     const testKey = 'aac_test_key';
     const saveRes = saveToStorage(testKey, { rate: 0.9 });

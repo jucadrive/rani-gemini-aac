@@ -36,17 +36,19 @@ describe('마음톡톡 AAC 의사소통 보드 단계별 집중 UI 및 통합 �
     fireEvent.click(screen.getByLabelText('빵 카드'));
     expect(screen.getByLabelText('동사 동작 보드')).toBeInTheDocument();
 
-    // 고빈도 동사(타요, 꺼내요, 뜯어요, 가요, 열어요)가 동사 보드에 모두 포함되어 있는지 검증
+    // 1페이지 고빈도 동사(타요, 꺼내요, 뜯어요, 가요, 열어요) 확인
     expect(screen.getByLabelText('타요 카드')).toBeInTheDocument();
     expect(screen.getByLabelText('꺼내요 카드')).toBeInTheDocument();
     expect(screen.getByLabelText('뜯어요 카드')).toBeInTheDocument();
     expect(screen.getByLabelText('가요 카드')).toBeInTheDocument();
     expect(screen.getByLabelText('열어요 카드')).toBeInTheDocument();
 
-    // 2. 동사 '먹어요' 선택 -> 결합 학습 스테이지 등장 (1차: 두 카드 조합 제시 화면)
+    // 2. 동사 '먹어요' 선택 -> 결합 학습 스테이지 및 아동 음성 녹음 컨트롤 바 등장 (1차: 두 카드 조합 제시 화면)
     fireEvent.click(screen.getByLabelText('먹어요 카드'));
     expect(screen.getByLabelText('명사 동사 결합 학습 스테이지')).toBeInTheDocument();
     expect(screen.getByLabelText('두 카드 조합 제시 화면')).toBeInTheDocument();
+    expect(screen.getByLabelText('아동 음성 녹음 컨트롤 바')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /아동 음성 녹음하기/i })).toBeInTheDocument();
 
     // 3. 2차: 하나로 합쳐진 실제 동작 그림('빵 먹어요 통합 동작 그림') 화면 제시 확인
     const mergedStageBtn = screen.getByRole('button', { name: /하나로 합쳐진 실제 동작 그림/i });
@@ -63,6 +65,26 @@ describe('마음톡톡 AAC 의사소통 보드 단계별 집중 UI 및 통합 �
 
     expect(screen.getByLabelText('즐겨찾기 표현 보드')).toBeInTheDocument();
     expect(screen.getByLabelText('즐겨찾기 표현 빵 주세요')).toBeInTheDocument();
+  });
+
+  it('놀이·장난감 카테고리에 그네, 트램폴린, 자전거, 노래가 제시되고 동사 페이지에 틀어주세요, 만지지 마세요, 좋아요, 맛있어요, 재밌어요가 제시되어야 한다', () => {
+    useAacStore.setState({ activeChapter: 'play', activeCategory: 'play', selectedCards: [] });
+    render(<App />);
+
+    expect(screen.getByLabelText('그네 카드')).toBeInTheDocument();
+    expect(screen.getByLabelText('트램폴린 카드')).toBeInTheDocument();
+    expect(screen.getByLabelText('자전거 카드')).toBeInTheDocument();
+    expect(screen.getByLabelText('노래 카드')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('노래 카드'));
+    fireEvent.click(screen.getByRole('button', { name: /다음 동사/i }));
+    fireEvent.click(screen.getByRole('button', { name: /다음 동사/i }));
+
+    expect(screen.getByLabelText('틀어주세요 카드')).toBeInTheDocument();
+    expect(screen.getByLabelText('만지지 마세요 카드')).toBeInTheDocument();
+    expect(screen.getByLabelText('좋아요 카드')).toBeInTheDocument();
+    expect(screen.getByLabelText('맛있어요 카드')).toBeInTheDocument();
+    expect(screen.getByLabelText('재밌어요 카드')).toBeInTheDocument();
   });
 
   it('치료사용 "새 카드 만들기" 모달에서 사진첩 선택 및 실시간 카메라 촬영 버튼을 제공하고 "명사 개수·음성 설정" 모달이 열려야 한다', () => {

@@ -40,7 +40,12 @@ export type VerbMotionType =
   | 'puttingIn'
   | 'wearing'
   | 'washing'
-  | 'watching';
+  | 'watching'
+  | 'turningOn'
+  | 'dontTouch'
+  | 'liking'
+  | 'delicious'
+  | 'fun';
 
 /**
  * @description 명사 카테고리 메타데이터 인터페이스

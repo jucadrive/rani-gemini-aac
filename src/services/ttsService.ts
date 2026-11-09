@@ -7,26 +7,19 @@ const listeners = new Set<TtsStatusListener>();
 /** 연속 문장 발화("빵" + "주세요" -> "빵 주세요") 예약 타이머 ID */
 let sentenceTimerId: ReturnType<typeof setTimeout> | null = null;
 
-/**
- * @description 발화 상태 변경을 모든 구독자(UI 컴포넌트)에게 브로드캐스트합니다.
- * @param isSpeaking 현재 음성 출력 중인지 여부
- * @param speakingText 현재 읽고 있는 한국어 텍스트
- */
+/** 발화 상태 변경을 모든 구독자(UI 컴포넌트)에게 브로드캐스트합니다. */
 function notifyStatus(isSpeaking: boolean, speakingText: string): void {
   listeners.forEach((listener) => listener({ isSpeaking, speakingText }));
 }
 
 /**
  * @description 한국어 TTS 보이스의 자연스러움(품질) 점수를 계산하는 순수 함수
- * 신경망(Natural/Neural), 온라인 고품질 음성, 삼성/구글 한국어 기본 엔진 순으로 가중치를 부여합니다.
  * @param voice 평가할 SpeechSynthesisVoice 객체
  * @returns {number} 품질 점수 (높을수록 고품질)
  */
 export function scoreKoreanVoiceQuality(voice: SpeechSynthesisVoice): number {
   const lang = (voice.lang || '').toLowerCase();
-  if (!lang.includes('ko')) {
-    return -1;
-  }
+  if (!lang.includes('ko')) return -1;
 
   let score = 10;
   const name = (voice.name || '').toLowerCase();
@@ -38,7 +31,6 @@ export function scoreKoreanVoiceQuality(voice: SpeechSynthesisVoice): number {
   if (name.includes('samsung') || uri.includes('samsung') || uri.includes('smt')) score += 25;
   if (name.includes('online') || !voice.localService) score += 15;
   if (voice.default) score += 5;
-
   return score;
 }
 
@@ -168,20 +160,26 @@ export function speakWordThenSentence(
   const cleanWord = wordText.trim();
   const cleanSentence = fullSentenceText.trim();
 
-  if (!shouldAutoRead || !cleanSentence || cleanWord === cleanSentence) {
+  if (!shouldAutoRead || !cleanSentence) {
     return speakText(cleanWord, settings);
+  }
+
+  /** 1차 조합 문장("비눗방울 하고 싶어요") 발화 완료 후 -> 2차 통합 동작 전환 및 재발화 */
+  const triggerMergedAfterSentence = (): void => {
+    sentenceTimerId = setTimeout(() => {
+      if (onMergedStageReached) onMergedStageReached();
+      speakText(cleanSentence, settings);
+    }, 650);
+  };
+
+  // 연속 다시 보기·즐겨찾기 실행 시: 1단계에서 즉시 전체 문장(명사+동사) 발화 후 2단계로 전환
+  if (cleanWord === cleanSentence) {
+    return speakText(cleanSentence, settings, triggerMergedAfterSentence);
   }
 
   return speakText(cleanWord, settings, () => {
     sentenceTimerId = setTimeout(() => {
-      // 1차: [빵 그림 + 먹는 그림] 카드 조합 상태에서 "빵 먹어요" 발화
-      speakText(cleanSentence, settings, () => {
-        sentenceTimerId = setTimeout(() => {
-          // 2차: 실제로 빵을 먹는 '하나의 동작 그림'으로 전환하며 다시 "빵 먹어요" 발화!
-          if (onMergedStageReached) onMergedStageReached();
-          speakText(cleanSentence, settings);
-        }, 650);
-      });
+      speakText(cleanSentence, settings, triggerMergedAfterSentence);
     }, DEFAULT_TTS_CONFIG.AUTO_SENTENCE_DELAY_MS);
   });
 }

@@ -8,10 +8,15 @@ import {
   PlayingScene,
 } from './VerbActionScenesA';
 import {
+  DeliciousScene,
+  DontTouchScene,
+  FunScene,
   GreetingScene,
   HelpingScene,
+  LikingScene,
   OpeningScene,
   RefusingScene,
+  TurningOnScene,
 } from './VerbActionScenesB';
 import {
   GoingScene,
@@ -115,6 +120,16 @@ export function AnimatedVerbGraphic({
         return <WashingScene size={size} />;
       case 'watching':
         return <WatchingScene size={size} />;
+      case 'turningOn':
+        return <TurningOnScene size={size} />;
+      case 'dontTouch':
+        return <DontTouchScene size={size} />;
+      case 'liking':
+        return <LikingScene size={size} />;
+      case 'delicious':
+        return <DeliciousScene size={size} />;
+      case 'fun':
+        return <FunScene size={size} />;
       default:
         return <BeggingScene size={size} />;
     }

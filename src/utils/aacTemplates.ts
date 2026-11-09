@@ -1,4 +1,5 @@
 import { AacCard, FavoriteSentence, NounCategory, VerbMotionType } from '../types/aac';
+import { SWING_SVG_DATA_URL, TRAMPOLINE_SVG_DATA_URL } from './playEquipmentSvg';
 
 /**
  * @description 커스텀 카드 추가 모달에서 제공하는 빠른 선택용 친근한 이모지 목록
@@ -23,6 +24,11 @@ export const VERB_MOTION_OPTIONS: { value: VerbMotionType; label: string }[] = [
   { value: 'wearing', label: '👕 입어요·신어요 (옷/신발 착용하기)' },
   { value: 'washing', label: '🫧 씻어요 (비누거품으로 씻기)' },
   { value: 'watching', label: '👀 봐요 (집중해서 바라보기)' },
+  { value: 'turningOn', label: '🎶 틀어주세요 (노래·음악 재생하기)' },
+  { value: 'dontTouch', label: '✋ 만지지 마세요 (손 내밀어 제지하기)' },
+  { value: 'liking', label: '👍 좋아요 (엄지척과 하트 표현)' },
+  { value: 'delicious', label: '😋 맛있어요 (볼 감싸며 맛 음미하기)' },
+  { value: 'fun', label: '😆 재밌어요 (신나게 만세하며 점프)' },
   { value: 'playing', label: '🎈 하고 싶어요·놀아요 (점프하며 놀기)' },
   { value: 'more', label: '➕ 더 주세요 (하나 더 추가하기)' },
   { value: 'helping', label: '🤝 도와주세요 (두 손 맞잡기)' },
@@ -55,7 +61,11 @@ export const DEFAULT_NOUN_CARDS: readonly AacCard[] = [
   { id: 'noun-juice', label: '주스', speechText: '주스', partOfSpeech: 'noun', categoryId: 'food', emoji: '🧃' },
   { id: 'noun-banana', label: '바나나', speechText: '바나나', partOfSpeech: 'noun', categoryId: 'food', emoji: '🍌' },
 
-  // 2. 놀이·장난감 (play)
+  // 2. 놀이·장난감 (play) — 그네(앞뒤 흔들림), 트램폴린(방방이 점프), 자전거, 노래 포함
+  { id: 'noun-swing', label: '그네', speechText: '그네', partOfSpeech: 'noun', categoryId: 'play', emoji: '🪢', customImageUrl: SWING_SVG_DATA_URL },
+  { id: 'noun-trampoline', label: '트램폴린', speechText: '트램폴린', partOfSpeech: 'noun', categoryId: 'play', emoji: '⏫', customImageUrl: TRAMPOLINE_SVG_DATA_URL },
+  { id: 'noun-bicycle', label: '자전거', speechText: '자전거', partOfSpeech: 'noun', categoryId: 'play', emoji: '🚲' },
+  { id: 'noun-song', label: '노래', speechText: '노래', partOfSpeech: 'noun', categoryId: 'play', emoji: '🎵' },
   { id: 'noun-ball', label: '공', speechText: '공', partOfSpeech: 'noun', categoryId: 'play', emoji: '⚽' },
   { id: 'noun-block', label: '블록', speechText: '블록', partOfSpeech: 'noun', categoryId: 'play', emoji: '🧱' },
   { id: 'noun-car', label: '자동차', speechText: '자동차', partOfSpeech: 'noun', categoryId: 'play', emoji: '🚗' },
@@ -113,6 +123,13 @@ export const DEFAULT_VERB_CARDS: readonly AacCard[] = [
   { id: 'verb-help', label: '도와주세요', speechText: '도와주세요', partOfSpeech: 'verb', emoji: '🤝', motionType: 'helping' },
   { id: 'verb-refuse', label: '싫어요', speechText: '싫어요', partOfSpeech: 'verb', emoji: '🙅', motionType: 'refusing' },
   { id: 'verb-greet', label: '안녕하세요', speechText: '안녕하세요', partOfSpeech: 'verb', emoji: '👋', motionType: 'greeting' },
+
+  // 3페이지: 음악·감각·자기옹호·긍정 감정 표현 동사 5종 (틀어주세요, 만지지 마세요, 좋아요, 맛있어요, 재밌어요)
+  { id: 'verb-turn-on', label: '틀어주세요', speechText: '틀어주세요', partOfSpeech: 'verb', emoji: '🎶', motionType: 'turningOn' },
+  { id: 'verb-dont-touch', label: '만지지 마세요', speechText: '만지지 마세요', partOfSpeech: 'verb', emoji: '✋', motionType: 'dontTouch' },
+  { id: 'verb-like', label: '좋아요', speechText: '좋아요', partOfSpeech: 'verb', emoji: '👍', motionType: 'liking' },
+  { id: 'verb-delicious', label: '맛있어요', speechText: '맛있어요', partOfSpeech: 'verb', emoji: '😋', motionType: 'delicious' },
+  { id: 'verb-fun', label: '재밌어요', speechText: '재밌어요', partOfSpeech: 'verb', emoji: '😆', motionType: 'fun' },
 ] as const;
 
 /**

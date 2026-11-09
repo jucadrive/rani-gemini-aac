@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Col, Row } from 'antd';
 import { AddCustomCardModal } from '../components/AddCustomCardModal';
 import { AppHeaderBar } from '../components/AppHeaderBar';
@@ -46,11 +46,11 @@ export function HomePage(): React.ReactElement {
 
   useEffect(() => () => { if (mergeTimerRef.current) clearTimeout(mergeTimerRef.current); }, []);
 
-  /** 1차 [명사+동사 카드 조합] 제시 후 -> 2차 [하나로 합쳐진 실제 동작 그림]으로 전환하는 타이머 예약 */
+  /** 1차 [명사+동사 카드 조합] 제시 후 -> 2차 [하나로 합쳐진 실제 동작 그림]으로 전환하는 안전 타이머 예약 */
   const scheduleMergeTransition = (): void => {
     if (mergeTimerRef.current) clearTimeout(mergeTimerRef.current);
     setStagePhase('combo');
-    mergeTimerRef.current = setTimeout(() => setStagePhase('merged'), 1500);
+    mergeTimerRef.current = setTimeout(() => setStagePhase('merged'), 5500);
   };
 
   /** 명사 또는 동사 카드 탭 시 단계별 활성화 및 2단계 연속 발화 처리 */
@@ -72,13 +72,15 @@ export function HomePage(): React.ReactElement {
     speakWithSentence(text, text, () => setStagePhase('merged'));
   };
 
-  /** 상단 문장 바 전체 비우기 및 1단계 복귀 */
-  const handleClearAll = (): void => {
+  /** 진행 중인 단계 전환 타이머와 TTS 발화를 모두 즉시 중단 (아동 음성 녹음/재생 간섭 방지) */
+  const stopAllSpeechAndTimers = useCallback((): void => {
     if (mergeTimerRef.current) clearTimeout(mergeTimerRef.current);
+    mergeTimerRef.current = null;
     stop();
-    setStagePhase('combo');
-    clearSentence();
-  };
+  }, [stop]);
+
+  /** 상단 문장 바 전체 비우기 및 1단계 복귀 */
+  const handleClearAll = (): void => { stopAllSpeechAndTimers(); setStagePhase('combo'); clearSentence(); };
 
   return (
     <main style={{ minHeight: '100vh', backgroundColor: WARM_PASTEL_COLORS.BG_MAIN, padding: '14px 20px 24px' }}>
@@ -110,11 +112,16 @@ export function HomePage(): React.ReactElement {
           sentenceText={sentenceText}
           stagePhase={stagePhase}
           isFavoriteSaved={isFavoriteSaved}
-          onChangePhase={(phase) => { setStagePhase(phase); speak(sentenceText); }}
+          onChangePhase={(phase, withTts = true) => {
+            if (mergeTimerRef.current) clearTimeout(mergeTimerRef.current);
+            setStagePhase(phase);
+            if (withTts) speak(sentenceText);
+          }}
           onReplaySequence={() => {
             scheduleMergeTransition();
-            speakWithSentence(selectedVerb.speechText, sentenceText, () => setStagePhase('merged'));
+            speakWithSentence(sentenceText, sentenceText, () => setStagePhase('merged'));
           }}
+          onStopTts={stopAllSpeechAndTimers}
           onSaveFavorite={() => saveCurrentAsFavorite()}
           onReset={handleClearAll}
         />
